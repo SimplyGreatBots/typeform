@@ -1,6 +1,5 @@
 import * as sdk from '@botpress/sdk'
 import * as bp from '.botpress'
-import axios from 'axios'
 import { typeformWebhookEventSchema } from './const'
 
 const crypto = require('crypto')
