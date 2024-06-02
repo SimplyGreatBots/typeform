@@ -39,7 +39,7 @@ export default new bp.Integration({
   
     if (!parsedData.success) {
       logger.forBot().error('Invalid Typeform webhook event:', parsedData.error)
-      return;
+      throw new sdk.RuntimeError('Invalid Typeform webhook event')
     }
 
     const secret = ctx.configuration.accessToken
@@ -47,12 +47,12 @@ export default new bp.Integration({
     
     if (!signature) {
       logger.forBot().error('Missing Typeform signature header')
-      return;
+      throw new sdk.RuntimeError('Missing Typeform signature header. Ensure you have added a secret key in the Typeform webhook.')
     }
     
     if (!verifySignature(signature, req.body, secret)) {
       logger.forBot().error('Typeform secret does not match Botpress token. Verify your secret key.');
-      return;
+      throw new sdk.RuntimeError('Typeform secret does not match Botpress token. Verify your secret key.');
     }
 
     const form_response = parsedData.data.form_response
@@ -71,12 +71,14 @@ export default new bp.Integration({
             data: form_response
           },
         });
-        logger.forBot().info('Typeform event created successfully.', event)
+        logger.forBot().info('Typeform event created successfully.')
       } catch (error) {
         logger.forBot().error('Failed to create Typeform event:', error)
+        throw new sdk.RuntimeError('Failed to create Typeform event. Check integration logger for more details.')
       }
     } else {
-      logger.forBot().warn('Could not find matching conversation ID. Ensure you are passing {{event.conversationId}} into your Send Typeform link.');
+      logger.forBot().warn('Could not find matching conversation ID. Ensure you are passing {{event.conversationId}} into your Send Typeform link.')
+      throw new sdk.RuntimeError('Could not find matching conversation ID. Ensure you are passing {{event.conversationId}} into your Send Typeform link.')
     }
   },
 })
